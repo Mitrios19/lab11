@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - DB_NAME=mydatabase
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_HOST=db
+      - DB_PORT=5432
+    command: ["./wait-for-it.sh", "db:5432", "--", "python", "app.py"]
+    depends_on:
+      - db
+    networks:
+      - mynetwork
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - mynetwork
+
+volumes:
+  pg_data:
+
+networks:
+  mynetwork:
+    driver: bridge
